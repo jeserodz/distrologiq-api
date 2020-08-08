@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - master
+env:
+  TEST: ${{secrets.TEST}}
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,4 +15,4 @@ jobs:
           node-version: '12'
       - run: npm install
       - run: npm build
-      - run: echo ${{ secrets.TEST }}
+      - run: echo "$TEST"
