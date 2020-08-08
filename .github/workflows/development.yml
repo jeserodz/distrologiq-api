@@ -3,8 +3,6 @@ on:
   push:
     branches:
       - master
-env:
-  TEST: ${{secrets.TEST}}
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,4 +13,25 @@ jobs:
           node-version: '12'
       - run: npm install
       - run: npm build
-      - run: echo "$TEST"
+      - name: Create .env file
+        uses: SpicyPizza/create-envfile@v1
+        with:
+          file_name: .env
+          envkey_NODE_ENV: development
+          envkey_PORT: 3000
+          envkey_DB_HOST: ${{secrets.DEV_DB_HOST}}
+          envkey_DB_USER: ${{secrets.DEV_DB_USER}}
+          envkey_DB_PASSWORD: ${{secrets.DEV_DB_PASSWORD}}
+          envkey_DB_NAME: ${{secrets.DEV_DB_NAME}}
+          envkey_DB_PORT: 3306
+          envkey_DB_LOGGING: true
+          envkey_MAPBOX_TOKEN: ${{secrets.DEV_MAPBOX_TOKEN}}
+          envkey_GOOGLE_MAPS_KEY: ${{secrets.DEV_GOOGLE_MAPS_KEY}}
+      - name: Deploy to Server
+        uses: easingthemes/ssh-deploy@v2.1.1
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEV_SERVER_SSH_KEY }}
+          ARGS: '-rltgoDzvO --delete'
+          REMOTE_HOST: ${{ secrets.DEV_REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.DEV_REMOTE_USER }}
+          TARGET: 'distrologiq-dev'
