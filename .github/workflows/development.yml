@@ -12,7 +12,7 @@ jobs:
         with:
           node-version: '12'
       - run: npm install
-      - run: npm build
+      - run: npm run build
       - name: Create .env file
         uses: SpicyPizza/create-envfile@v1
         with:
@@ -30,9 +30,19 @@ jobs:
       - name: Deploy to Server
         uses: easingthemes/ssh-deploy@v2.1.1
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.DEV_SERVER_SSH_KEY }}
-          ARGS: '-rltgoDzvO --delete'
-          SOURCE: '.'
           REMOTE_HOST: ${{ secrets.DEV_REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.DEV_REMOTE_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.DEV_SERVER_SSH_KEY }}
           TARGET: 'distrologiq-dev'
+          ARGS: '-rltgoDzvO --delete'
+          SOURCE: '.'
+      - name: Restart Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEV_REMOTE_HOST }}
+          username: ${{ secrets.DEV_REMOTE_USER }}
+          key: ${{ secrets.DEV_SERVER_SSH_KEY }}
+          script: |
+            cd distrologiq-dev
+            pm2 delete distrologiq-dev
+            pm2 start --name distrologiq-dev npm -- run start:prod
