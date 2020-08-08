@@ -1,0 +1,6 @@
+export enum RouteStopType {
+  DELIVERY = 'DELIVERY',
+  PICKUP = 'PICKUP',
+  DELIVERY_PICKUP = 'DELIVERY_PICKUP',
+  ARRIVAL = 'ARRIVAL',
+}
