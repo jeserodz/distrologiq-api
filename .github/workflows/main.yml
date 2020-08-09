@@ -36,4 +36,4 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd ~
-            docker-compose up --build -d distrologiq-dev
+            docker-compose up --build -d distrologiq-api-dev
