@@ -8,7 +8,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const port = app.get(ConfigService).get('PORT');
 
-  const options = new DocumentBuilder().setTitle('Distrologiq').addBearerAuth().build(); // prettier-ignore
+  const options = new DocumentBuilder().setTitle('Distrologiq').setVersion('1.0.0').addBearerAuth().build(); // prettier-ignore
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api', app, document);
 

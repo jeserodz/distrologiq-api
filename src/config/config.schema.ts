@@ -5,7 +5,7 @@ export class ConfigSchema {
   NODE_ENV: string;
 
   @IsNumber()
-  PORT: number;
+  PORT?: number;
 
   @IsUrl()
   DB_HOST: string;
