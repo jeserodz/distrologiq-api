@@ -7,6 +7,8 @@ WORKDIR /usr/src/app
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
 COPY package*.json ./
 
+RUN apk --no-cache add --virtual builds-deps build-base python
+
 RUN npm install
 
 # Bundle app source
