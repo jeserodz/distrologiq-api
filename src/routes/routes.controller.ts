@@ -7,7 +7,7 @@ import {
   Patch,
   Delete,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { RoutesService } from './routes.service';
 import {
   CreateRouteDTO,
@@ -22,7 +22,6 @@ export class RoutesController {
   constructor(private routesService: RoutesService) {}
 
   @Post()
-  @ApiOperation({ operationId: 'create' })
   async create(@Body() data: CreateRouteDTO) {
     return this.routesService.create(data);
   }
