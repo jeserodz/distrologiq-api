@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Destination } from './destinations.entity';
 import { Repository } from 'typeorm';
@@ -11,18 +11,18 @@ export class DestinationsService {
     private destinationsRepository: Repository<Destination>,
   ) {}
 
-  async create(data: CreateDestinationDTO) {
-    const destination = new Destination();
-    Object.assign(destination, data);
-    return this.destinationsRepository.save(destination);
-  }
-
   async getAll() {
     return this.destinationsRepository.find({});
   }
 
-  async get(id: number) {
+  async getOne(id: number) {
     return this.destinationsRepository.findOne({ where: { id } });
+  }
+
+  async create(data: CreateDestinationDTO) {
+    const destination = new Destination();
+    Object.assign(destination, data);
+    return this.destinationsRepository.save(destination);
   }
 
   async update(id: number, data: UpdateDestinationDTO) {
@@ -32,7 +32,14 @@ export class DestinationsService {
   }
 
   async remove(id: number) {
-    return this.destinationsRepository.delete(id);
+    try {
+      await this.destinationsRepository.delete(id);
+    } catch (error) {
+      const msg =
+        'No se pudo eliminar este destino. ' +
+        'Puede que esté siendo utilizado por la aplicación.';
+      throw new UnprocessableEntityException(msg);
+    }
   }
 
   /**

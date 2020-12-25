@@ -26,7 +26,16 @@ export class ConfigSchema {
   DB_LOGGING: boolean;
 
   @IsString()
+  ADMIN_USERNAME: string;
+
+  @IsString()
+  ADMIN_PASSWORD: string;
+
+  @IsString()
   MAPBOX_TOKEN: string;
+
+  @IsString()
+  GOOGLE_MAPS_KEY: string;
 }
 
 export type ConfigKeys = keyof ConfigSchema;

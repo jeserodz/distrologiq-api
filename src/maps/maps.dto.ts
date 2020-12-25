@@ -1,4 +1,5 @@
 import { RouteStop } from '../routes/routes-stops.entity';
+import { IsArray } from 'class-validator';
 
 export class RouteGeometry {
   type: string;
@@ -25,13 +26,18 @@ export class SearchPlacesResponse {
 }
 
 export class CalculateRouteDTO {
-  routeStops: RouteStop[];
+  routeStops: Partial<RouteStop>[];
+  estimatedStartDate: Date | null;
+  avgLoadTime: number;
 }
 
 export class CalculateRouteResponse {
+  estimatedStartDate: Date | null;
+  estimatedEndDate: Date | null;
+  avgLoadTime: number;
   distance: number;
   duration: number;
   durationWithLoadTime: number;
   geometry: RouteGeometry;
-  optimizedRouteStops: RouteStop[];
+  optimizedRouteStops: Partial<RouteStop>[];
 }

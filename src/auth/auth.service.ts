@@ -37,20 +37,19 @@ export class AuthService {
     });
 
     await this.tokensRepository.save({
+      jwt: accessToken,
       user,
-      uuid: accessToken,
     });
 
-    return { accessToken } as SignInResponseDTO;
+    return { accessToken };
   }
 
-  async verifyAccessToken(accessToken: string) {
-    try {
-      jwt.verify(accessToken, 'secret', { ignoreExpiration: false });
-      this.tokensRepository.findOneOrFail({ where: { uuid: accessToken } });
-      return true;
-    } catch (error) {
-      return false;
-    }
+  async verifyAccessToken(accessToken: string): Promise<AuthToken | undefined> {
+    jwt.verify(accessToken, 'secret', { ignoreExpiration: false });
+
+    return this.tokensRepository.findOne({
+      where: { jwt: accessToken },
+      relations: ['user'],
+    });
   }
 }

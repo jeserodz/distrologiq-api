@@ -15,17 +15,17 @@ export class Destination extends BaseEntity {
   @Column()
   name: string;
 
-  @Column()
-  email: string;
+  @Column({ nullable: true })
+  code?: string;
 
-  @Column()
-  phone: string;
+  @Column({ nullable: true })
+  email?: string;
 
-  @Column()
-  code: string;
+  @Column({ nullable: true })
+  phone?: string;
 
-  @Column()
-  references: string;
+  @Column({ nullable: true })
+  references?: string;
 
   @Column({ type: 'double' })
   longitude: number;
@@ -33,7 +33,7 @@ export class Destination extends BaseEntity {
   @Column({ type: 'double' })
   latitude: number;
 
-  @Column()
+  @Column({ default: false })
   isOwnCompany: boolean;
 
   @CreateDateColumn()

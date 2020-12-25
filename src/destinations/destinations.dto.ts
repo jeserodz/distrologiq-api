@@ -1,20 +1,35 @@
+import { IsString, IsNumber, IsOptional, IsBoolean } from 'class-validator';
+import { PartialType } from '@nestjs/swagger';
+
 export class CreateDestinationDTO {
+  @IsString()
   name: string;
-  email: string;
-  phone: string;
-  code: string;
-  references: string;
+
+  @IsOptional()
+  @IsString()
+  email?: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @IsOptional()
+  @IsString()
+  code?: string;
+
+  @IsOptional()
+  @IsString()
+  references?: string;
+
+  @IsNumber()
   longitude: number;
+
+  @IsNumber()
   latitude: number;
+
+  @IsOptional()
+  @IsBoolean()
+  isOwnCompany?: boolean;
 }
 
-export class UpdateDestinationDTO {
-  id: number;
-  name?: string;
-  email?: string;
-  phone?: string;
-  code?: string;
-  references?: string;
-  longitude?: number;
-  latitude?: number;
-}
+export class UpdateDestinationDTO extends PartialType(CreateDestinationDTO) {}

@@ -19,7 +19,10 @@ export class ConfigService {
     this.config.DB_PASSWORD = process.env.DB_PASSWORD;
     this.config.DB_NAME = process.env.DB_NAME;
     this.config.DB_LOGGING = JSON.parse(process.env.DB_LOGGING || 'false');
+    this.config.ADMIN_USERNAME = process.env.ADMIN_USERNAME;
+    this.config.ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
     this.config.MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
+    this.config.GOOGLE_MAPS_KEY = process.env.GOOGLE_MAPS_KEY;
     this.validate();
   }
 

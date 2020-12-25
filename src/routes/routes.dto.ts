@@ -5,25 +5,30 @@ import { User } from '../users/users.entity';
 export class CreateRouteDTO {
   name: string;
   distance: number;
+  avgLoadTime: number;
   duration: number;
   durationWithLoadTime: number;
+  estimatedStartDate: Date | null;
+  estimatedEndDate: Date | null;
   geometry: RouteGeometry;
   stops: RouteStop[];
   driver?: User;
 }
 
 export class UpdateRouteDTO {
-  id: number;
   name: string;
   distance: number;
+  avgLoadTime: number;
   duration: number;
   durationWithLoadTime: number;
+  estimatedStartDate: Date | null;
+  estimatedEndDate: Date | null;
   geometry: RouteGeometry;
+  stops: RouteStop[];
+  driver: User;
   started: Date;
   completed: Date;
   completedDuration: number;
-  stops: RouteStop[];
-  driver: User;
 }
 
 export class GetRouteStopDTO {

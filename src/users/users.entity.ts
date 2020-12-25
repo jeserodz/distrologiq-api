@@ -1,13 +1,6 @@
-import {
-  Entity,
-  BaseEntity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  PrimaryColumn,
-} from 'typeorm';
+import { Entity, BaseEntity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, PrimaryColumn,} from 'typeorm'; // prettier-ignore
 import { Exclude } from 'class-transformer';
+import { UserRoles } from './users.roles';
 
 @Entity()
 export class User extends BaseEntity {
@@ -28,19 +21,13 @@ export class User extends BaseEntity {
   email?: string;
 
   @Column({ type: 'json' })
-  roles: UserRoles = {
-    admin: true,
-    driver: true,
-  };
+  roles: UserRoles;
 
   @CreateDateColumn()
+  @Exclude()
   createdAt: string;
 
   @UpdateDateColumn()
+  @Exclude()
   updatedAt: string;
-}
-
-export interface UserRoles {
-  admin: boolean;
-  driver: boolean;
 }

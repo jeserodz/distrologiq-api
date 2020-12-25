@@ -4,8 +4,6 @@ import {
   Column,
   ManyToOne,
   PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 
 import { Route } from './routes.entity';
@@ -23,7 +21,7 @@ export class RouteStop extends BaseEntity {
   @ManyToOne(() => Destination, { nullable: false, eager: true })
   destination: Destination;
 
-  @ManyToOne(() => Route, route => route.stops, { nullable: false }) // prettier-ignore
+  @ManyToOne(() => Route, route => route.stops, { nullable: false, onDelete: 'CASCADE' }) // prettier-ignore
   route: Route;
 
   @Column()
@@ -34,10 +32,4 @@ export class RouteStop extends BaseEntity {
 
   @Column({ nullable: true })
   completed: Date | null;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 }

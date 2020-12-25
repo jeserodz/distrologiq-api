@@ -15,7 +15,3 @@ export class SignInResponseDTO {
   @ApiProperty()
   accessToken: string;
 }
-
-export class JwtPayloadDto {
-  username: string;
-}

@@ -7,17 +7,19 @@ import { SettingsModule } from './settings/settings.module';
 import { DestinationsModule } from './destinations/destinations.module';
 import { RoutesModule } from './routes/routes.module';
 import { MapsModule } from './maps/maps.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
     ConfigModule,
     DatabaseModule,
-    UsersModule,
     AuthModule,
+    UsersModule,
     SettingsModule,
     DestinationsModule,
     RoutesModule,
     MapsModule,
+    AnalyticsModule,
   ],
 })
 export class AppModule {}

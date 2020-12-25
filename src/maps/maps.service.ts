@@ -3,6 +3,7 @@ import { DirectionsRequestWaypoint } from '@mapbox/mapbox-sdk/services/direction
 import * as Optimization from '@mapbox/mapbox-sdk/services/optimization';
 import * as Geocoding from '@mapbox/mapbox-sdk/services/geocoding';
 import { Client, Status } from '@googlemaps/google-maps-services-js';
+import * as dayjs from 'dayjs';
 
 import { ConfigService } from '../config/config.service';
 import {
@@ -26,7 +27,7 @@ export class MapsService {
     private settingsService: SettingsService,
   ) {
     this.mapboxToken = this.configService.get('MAPBOX_TOKEN');
-    this.googleMapsKey = 'AIzaSyCcs1uIlV8JufBDVmnelW_GN0vYhiCW-Oc';
+    this.googleMapsKey = this.configService.get('GOOGLE_MAPS_KEY');
     this.googleMaspsClient = new Client();
   }
 
@@ -81,14 +82,14 @@ export class MapsService {
     return { places } as SearchPlacesResponse;
   }
 
-  async calculateRoute(params: CalculateRouteDTO) {
+  async calculateRoute(data: CalculateRouteDTO) {
     const accessToken = process.env.MAPBOX_TOKEN;
     const client = Optimization({ accessToken });
 
     const settings = await this.settingsService.get();
 
     const { companyWaypoint, stopWaypoints } = this.getWaypoints(
-      params.routeStops,
+      data.routeStops,
       settings,
     );
 
@@ -105,7 +106,7 @@ export class MapsService {
       .getOptimization(optimizationSettings)
       .send();
 
-    this.addAverageTruckLoadTime(route, settings);
+    this.addAverageTruckLoadTime(route, data.avgLoadTime);
 
     // Serialize coordinates for Firestore
     route.trips[0].geometry.coordinates = JSON.stringify(
@@ -113,24 +114,31 @@ export class MapsService {
     );
 
     // Re-order routeStops per waypoint_index (excludes owning company)
-    const optimizedRouteStops: RouteStop[] = [];
+    const optimizedRouteStops: Partial<RouteStop>[] = [];
     route.waypoints.slice(1).forEach((waypoint: any, index: number) => {
       const waypointIndex = waypoint.waypoint_index - 1;
 
-      const routeStop = params.routeStops[index];
+      const routeStop = data.routeStops[index];
       routeStop.waypointIndex = waypointIndex;
 
       optimizedRouteStops[waypointIndex] = routeStop;
       optimizedRouteStops[waypointIndex].waypointIndex = waypointIndex;
     });
 
-    return {
-      distance: route.trips[0].distance,
-      duration: route.trips[0].duration,
+    const trip = route.trips[0];
+
+    const result: CalculateRouteResponse = {
+      avgLoadTime: data.avgLoadTime,
+      distance: trip.distance,
+      duration: trip.duration,
       durationWithLoadTime: route.trips[0].durationWithLoadTime,
-      geometry: route.trips[0].geometry,
+      estimatedStartDate: data.estimatedStartDate,
+      estimatedEndDate: data.estimatedStartDate ? dayjs(data.estimatedStartDate).add(trip.durationWithLoadTime, 'second').toDate() : null, // prettier-ignore
+      geometry: trip.geometry,
       optimizedRouteStops,
-    } as CalculateRouteResponse;
+    };
+
+    return result;
   }
 
   /**
@@ -138,7 +146,7 @@ export class MapsService {
    * @param routeStops
    * @param settings
    */
-  getWaypoints(routeStops: RouteStop[], settings: Settings) {
+  getWaypoints(routeStops: Partial<RouteStop>[], settings: Settings) {
     const companyWaypoint: DirectionsRequestWaypoint = {
       coordinates: [
         settings.destination.longitude,
@@ -168,13 +176,15 @@ export class MapsService {
    * @param route
    * @param settings
    */
-  addAverageTruckLoadTime(route: any, settings: Settings) {
+  addAverageTruckLoadTime(route: any, avgLoadTime: number) {
     route.trips.forEach((trip: any) => {
       trip.durationWithLoadTime = 0;
-      trip.legs.forEach((tripLeg: any) => {
-        tripLeg.durationWithLoadTime =
-          tripLeg.duration + settings.avgLoadTime * 60;
-        trip.durationWithLoadTime += tripLeg.durationWithLoadTime;
+      trip.legs.forEach((tripLeg: any, index: number) => {
+        // Only add load time to in-between stops
+        if (index > 0 && index < trip.legs.length - 1) {
+          tripLeg.durationWithLoadTime = tripLeg.duration + avgLoadTime * 60;
+          trip.durationWithLoadTime += tripLeg.durationWithLoadTime;
+        }
       });
     });
   }

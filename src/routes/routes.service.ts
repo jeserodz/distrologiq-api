@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  MethodNotAllowedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Route } from './routes.entity';
 import { Repository } from 'typeorm';
@@ -23,7 +27,11 @@ export class RoutesService {
   async create(data: CreateRouteDTO) {
     const route = new Route();
 
-    await Route.merge(route, data, { stops: [] }).save();
+    Object.assign(route, data);
+
+    route.stops = [];
+
+    await route.save();
 
     for (const stopData of data.stops) {
       const stop = new RouteStop();
@@ -83,6 +91,12 @@ export class RoutesService {
   }
 
   async remove(id: number) {
+    const route = await this.get(id);
+
+    if (route.started) {
+      throw new MethodNotAllowedException('Esta ruta ha sido iniciada.');
+    }
+
     return this.routesRepository.delete(id);
   }
 
@@ -105,11 +119,12 @@ export class RoutesService {
   async startRouteStop(id: number, data: StartRouteStopDTO) {
     const routeStop = await RouteStop.findOne({
       where: { id },
+      relations: ['route'],
     });
 
     await this.preventMultipleIncompleteRouteStops(routeStop);
 
-    routeStop.started = data.startDatetime;
+    routeStop.started = new Date(data.startDatetime);
     await this.routesStopsRepository.save(routeStop);
     await this.setRouteStarted(routeStop);
     return routeStop;
@@ -118,9 +133,10 @@ export class RoutesService {
   async completeRouteStop(id: number, data: CompleteRouteStopDTO) {
     const routeStop = await this.routesStopsRepository.findOne({
       where: { id },
+      relations: ['route'],
     });
 
-    routeStop.completed = data.completionDatetime;
+    routeStop.completed = new Date(data.completionDatetime);
 
     await routeStop.save();
     await this.setRouteCompleted(routeStop);
@@ -139,8 +155,8 @@ export class RoutesService {
     });
 
     if (incompleteRouteStops.length > 0) {
-      throw Error(
-        `Tiene un recorrido activo sin completar hacia "${incompleteRouteStops[0].destination.name}".` +
+      throw new ForbiddenException(
+        `Tiene un recorrido activo sin completar hacia "${incompleteRouteStops[0].destination.name}". ` +
           `Por favor, complete el recorrido anterior antes de iniciar uno nuevo.`,
       );
     }
